@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>You Found a Way In</title>
+<style>
+  :root{
+    --navy:#1B2A4A; --ink:#16203A; --teal:#1F8F88; --teal-lt:#7FD4CE;
+    --amber:#D98A0B; --gold:#B8860B; --bg:#F4F6FA; --card:#FFFFFF; --line:#C9D2E4;
+    --muted:#6B7691; --good:#1F7A3A; --good-bg:#E4F1E7; --bad:#B42318; --bad-bg:#FBE8E8;
+    --zebra:#EEF2F9; --pale-amber:#FDF3E0; --pale-teal:#E6F4F3;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:Arial,Helvetica,sans-serif;font-size:18px;line-height:1.45}
+  header{background:var(--navy);color:#fff;padding:14px 24px;display:flex;
+    align-items:baseline;gap:18px;flex-wrap:wrap}
+  header h1{margin:0;font-size:30px;letter-spacing:.5px}
+  header span{color:var(--teal-lt);font-weight:bold;font-size:16px}
+  nav{display:flex;gap:8px;padding:14px 24px 0;flex-wrap:wrap}
+  nav button{font:inherit;font-weight:bold;font-size:18px;border:2px solid var(--navy);
+    background:#fff;color:var(--navy);border-radius:10px 10px 0 0;padding:10px 16px;cursor:pointer}
+  nav button[aria-selected="true"]{background:var(--navy);color:#fff}
+  button:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
+  main{padding:0 24px 32px}
+  section.tab{display:none;background:var(--card);border:2px solid var(--navy);
+    border-radius:0 12px 12px 12px;padding:22px}
+  section.tab.active{display:block}
+  h2{margin:0 0 6px;color:var(--navy);font-size:26px}
+  .lead{margin:0 0 16px;color:var(--muted);font-size:17px}
+  .wrap{max-width:900px}
+  .btn{font:inherit;font-weight:bold;font-size:19px;border:none;border-radius:10px;padding:12px 20px;
+    background:var(--teal);color:#fff;cursor:pointer}
+  .btn.alt{background:#fff;color:var(--navy);border:2px solid var(--navy)}
+  .scene{background:var(--navy);color:#fff;border-radius:16px;padding:20px 24px;margin:8px 0 16px}
+  .scene small{display:block;color:var(--teal-lt);font-weight:bold;font-size:15px;letter-spacing:.5px;margin-bottom:6px}
+  .scene p{margin:0 0 10px;font-size:21px}
+  .scene p:last-child{margin-bottom:0}
+  .phone{background:#fff;color:var(--ink);border-radius:14px;padding:14px 18px;margin:12px 0;
+    border:3px solid var(--teal-lt);max-width:440px;font-size:18px}
+  .phone b{color:var(--navy)}
+  .phone .top{font-size:14px;color:var(--muted);font-weight:bold;letter-spacing:.5px;margin-bottom:6px}
+  .note{border-left:8px solid var(--amber);background:var(--pale-amber);border-radius:8px;
+    padding:12px 16px;margin:0 0 16px;font-size:18px}
+  .note.law{border-left-color:var(--bad);background:var(--bad-bg)}
+  .note.good{border-left-color:var(--good);background:var(--good-bg)}
+  .choices{display:grid;gap:10px}
+  .choice{font:inherit;text-align:left;cursor:pointer;border:2px solid var(--line);background:#fff;
+    border-radius:12px;padding:14px 16px;font-size:19px;color:var(--navy);font-weight:bold}
+  .choice:hover{border-color:var(--teal)}
+  .choice .k{display:inline-block;min-width:34px;color:var(--amber)}
+  .q{font-size:22px;font-weight:bold;color:var(--navy);margin:4px 0 10px}
+  .labels{display:flex;gap:12px;flex-wrap:wrap;margin:6px 0 14px}
+  .lab{border-radius:12px;padding:10px 16px;font-weight:bold;font-size:20px;border:3px solid}
+  .lab.yes{border-color:var(--good);background:var(--good-bg);color:var(--good)}
+  .lab.no{border-color:var(--bad);background:var(--bad-bg);color:var(--bad)}
+  .lab.maybe{border-color:var(--amber);background:var(--pale-amber);color:#8a5a00}
+  .corner{display:inline-flex;align-items:center;gap:10px;font-weight:bold;font-size:18px;color:var(--navy)}
+  .corner i{font-style:normal;display:inline-flex;align-items:center;justify-content:center;
+    width:44px;height:44px;border-radius:10px;color:#fff;font-size:24px}
+  .c1{background:var(--teal)} .c2{background:var(--amber)} .c3{background:var(--gold)} .c4{background:var(--bad)}
+  .endtitle{font-size:28px;font-weight:bold;color:var(--navy);margin:0 0 4px}
+  .story p{font-size:20px;margin:0 0 10px}
+  .found{margin-top:18px;border-top:2px solid var(--zebra);padding-top:14px}
+  .found ul{list-style:none;padding:0;margin:8px 0 0;display:grid;gap:6px}
+  .found li{font-size:18px}
+  .found li.got{color:var(--good);font-weight:bold}
+  .found li.not{color:var(--muted)}
+  .bar{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px;align-items:center}
+  .stw{display:grid;gap:8px;margin:10px 0 0}
+  .stw div{display:flex;gap:12px;align-items:center}
+  .stw b{display:inline-flex;justify-content:center;min-width:86px;padding:8px 10px;border-radius:8px;color:#fff;font-size:18px}
+  /* sort */
+  .grid4{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0}
+  .cbtn{font:inherit;cursor:pointer;border:3px solid;border-radius:12px;padding:12px;background:#fff;
+    font-weight:bold;font-size:19px;display:flex;align-items:center;gap:12px;text-align:left}
+  .cbtn i{font-style:normal;flex:0 0 46px;height:46px;border-radius:10px;color:#fff;font-size:24px;
+    display:flex;align-items:center;justify-content:center}
+  .cbtn.k1{border-color:var(--teal);color:var(--teal)} .cbtn.k1 i{background:var(--teal)}
+  .cbtn.k2{border-color:var(--amber);color:#8a5a00} .cbtn.k2 i{background:var(--amber)}
+  .cbtn.k3{border-color:var(--gold);color:#7a5a00} .cbtn.k3 i{background:var(--gold)}
+  .cbtn.k4{border-color:var(--bad);color:var(--bad)} .cbtn.k4 i{background:var(--bad)}
+  .cbtn:disabled{opacity:.55;cursor:default}
+  .cbtn.picked{opacity:1;box-shadow:0 0 0 4px var(--navy) inset}
+  .fb{margin-top:14px;padding:14px 18px;border-radius:10px;font-size:19px}
+  .fb.ok{background:var(--good-bg);border-left:6px solid var(--good)}
+  .fb.no{background:var(--bad-bg);border-left:6px solid var(--bad)}
+  .fb.part{background:var(--pale-amber);border-left:6px solid var(--amber)}
+  .fb strong{display:block;margin-bottom:4px}
+  .progress{height:10px;background:var(--zebra);border-radius:6px;overflow:hidden;margin:6px 0 12px}
+  .progress i{display:block;height:100%;background:var(--teal);width:0}
+  .score{font-size:20px;font-weight:bold;color:var(--navy)}
+  .hidden{display:none}
+  table.law{border-collapse:collapse;width:100%;margin:10px 0}
+  table.law th,table.law td{border:1px solid var(--line);padding:10px 12px;text-align:left;vertical-align:top;font-size:18px}
+  table.law th{background:var(--navy);color:#fff}
+  table.law tr:nth-child(even) td{background:var(--zebra)}
+  footer{color:var(--muted);font-size:14px;padding:0 24px 24px}
+  @media (max-width:640px){
+    header h1{font-size:24px} main{padding:0 12px 24px} nav{padding:12px 12px 0}
+    section.tab{padding:16px} .grid4{grid-template-columns:1fr} .scene p{font-size:19px}
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>You Found a Way In</h1>
+  <span>Year 9 · L07 · Ethics, the Law and Responsibility</span>
+</header>
+<nav role="tablist">
+  <button role="tab" aria-selected="true" data-tab="story">1 · The story</button>
+  <button role="tab" aria-selected="false" data-tab="sort">2 · Legal or right?</button>
+  <button role="tab" aria-selected="false" data-tab="card">3 · The rules</button>
+</nav>
+<main>
+  <section class="tab active" id="story">
+    <div class="wrap" id="storyBox"></div>
+  </section>
+
+  <section class="tab" id="sort">
+    <div class="wrap">
+      <h2>Legal or right?</h2>
+      <p class="lead">Eight new cards. Pick the corner. Then read why.</p>
+      <div class="progress"><i id="sortBar"></i></div>
+      <div id="sortBox"></div>
+    </div>
+  </section>
+
+  <section class="tab" id="card">
+    <div class="wrap">
+      <h2>The rules</h2>
+      <p class="lead">Use these in your worksheet and homework.</p>
+      <div class="q">Two questions, every time</div>
+      <p><b>IS IT LEGAL?</b> Were you allowed — by the owner, by the law?<br>
+         <b>IS IT RIGHT?</b> Is it fair and honest? Who could get hurt?</p>
+      <div class="q">Found a flaw?</div>
+      <div class="stw">
+        <div><b style="background:var(--teal)">STOP</b> Go no further. Do not test it, copy it or share it.</div>
+        <div><b style="background:var(--amber)">TELL</b> Tell the owner privately. Say what you saw.</div>
+        <div><b style="background:var(--navy)">WAIT</b> Give them time to fix it. Tell nobody else first.</div>
+      </div>
+      <div class="q" style="margin-top:18px">The law</div>
+      <table class="law">
+        <tr><th>Law</th><th>What it says</th></tr>
+        <tr><td><b>Qatar</b><br>Law No. 14 of 2014, Article 3</td>
+            <td>A crime to: get into a system without the right · go beyond what you are allowed ·
+              stay in once you know you should not. Up to 3 years in prison, a fine up to QR 500,000, or both.
+              Doubled if data is changed, deleted or shared.</td></tr>
+        <tr><td><b>UK</b><br>Computer Misuse Act 1990</td>
+            <td>Here to compare. Unauthorised access: up to 2 years.</td></tr>
+      </table>
+      <p class="note good"><b>The line is permission.</b> Neither law asks WHY you did it.
+        Both ask: were you ALLOWED?</p>
+    </div>
+  </section>
+</main>
+<footer>Everything in this app is made up, except the laws. Nothing is saved or sent.</footer>
+
+<script>
+(function(){
+  /* ---------- tabs ---------- */
+  var tabs = document.querySelectorAll('nav button');
+  tabs.forEach(function(b){
+    b.addEventListener('click', function(){
+      tabs.forEach(function(x){ x.setAttribute('aria-selected', x === b ? 'true' : 'false'); });
+      document.querySelectorAll('section.tab').forEach(function(s){
+        s.classList.toggle('active', s.id === b.dataset.tab);
+      });
+    });
+  });
+
+  function esc(t){ return t; }
+  function el(html){ var d = document.createElement('div'); d.innerHTML = html; return d; }
+
+  /* ---------- the story ---------- */
+  var ENDINGS = {
+    private: {title: "The right way in", corner: 1,
+      legal: ["yes", "LEGAL? ✔ Yes"], right: ["yes", "RIGHT? ✔ Yes"],
+      story: ["Khalid's dad emails the academy that evening. He says what Khalid saw, and when.",
+              "He does not attach Yaseen's details. The academy does not need them.",
+              "Two days later the app is fixed. The academy writes back to say thank you.",
+              "The coach laughs: “Our IT company gets paid to find flaws like that. You did it for free.”"],
+      rule: "STOP · TELL · WAIT. Khalid told the owner privately, and gave them time to fix it. That is responsible disclosure — and it is what penetration testers and bug bounty hunters do for a job, with permission."},
+    public: {title: "Loud, not responsible", corner: 2,
+      legal: ["yes", "LEGAL? ✔ Probably"], right: ["no", "RIGHT? ✘ Not the right way"],
+      story: ["The post is shared 400 times in an hour.",
+              "The academy has not even read it yet. Strangers start opening the app to look.",
+              "By morning, some families are getting scam messages on their phones.",
+              "Khalid wanted to help. He told the right people — but he told everyone else at the same time."],
+      rule: "He did STOP and TELL. He skipped WAIT. Posting a flaw publicly warns the criminals before the owner can fix it."},
+    silent: {title: "Not my problem", corner: 2,
+      legal: ["yes", "LEGAL? ✔ Yes"], right: ["maybe", "RIGHT? ? You decide"],
+      story: ["Khalid closes the app and goes to bed.",
+              "A month later, someone else finds the same mistake.",
+              "This time it is someone who sells phone numbers to scammers.",
+              "Khalid did nothing illegal. But he was the one person who could have warned the academy."],
+      rule: "Doing nothing is not a crime. But a bystander can still make a difference — like Nasser in card C. One private message to the owner was all it needed."},
+    chat: {title: "The group chat", corner: 4,
+      legal: ["no", "LEGAL? ✘ Can break the law"], right: ["no", "RIGHT? ✘ No"],
+      story: ["Khalid sends the screenshot to the team chat: “LOL look at this.”",
+              "Twenty players see Yaseen's name, his parent's number and where he lives. One forwards it.",
+              "Yaseen's parents start getting messages from people they do not know. Yaseen is upset.",
+              "The academy finds out where the screenshot came from."],
+      rule: "Yaseen's name, phone number and area are personal data (L04). Sharing someone's personal details without permission can break the law — and it hurt a 12-year-old who did nothing wrong."},
+    list: {title: "Just curious", corner: 4,
+      legal: ["no", "LEGAL? ✘ No"], right: ["no", "RIGHT? ✘ No"],
+      story: ["Khalid keeps tapping “next”. By midnight he has saved 214 families' details on his phone.",
+              "He emails the list to the academy “as proof”.",
+              "The academy's IT team sees one account opened 214 bookings and copied them.",
+              "They have to treat it as a data breach. Khalid's dad gets a very serious phone call."],
+      rule: "Finding the mistake was not a crime. Carrying on once he knew was. Qatar's law (Article 3) covers staying in once you know you should not — and copying data makes the penalty double. “I was only curious” is not a defence."}
+  };
+  var ORDER = ["private", "public", "silent", "chat", "list"];
+  var found = {};
+  var late = false;
+
+  var box = document.getElementById('storyBox');
+
+  function phone(){
+    return '<div class="phone"><div class="top">CORNICHE KICKERS · MY BOOKING</div>' +
+      '<b>Player:</b> Yaseen A., age 12<br><b>Parent\'s phone:</b> 55•• ••••<br>' +
+      '<b>Area:</b> Al Waab<br><b>Training:</b> Tuesday, 5 pm</div>';
+  }
+
+  function scene(html, q, choices){
+    var h = html + '<div class="q">' + q + '</div><div class="choices">';
+    choices.forEach(function(c, i){
+      h += '<button class="choice" data-i="' + i + '"><span class="k">' + "ABCD"[i] + '</span>' + c[0] + '</button>';
+    });
+    h += '</div>';
+    box.innerHTML = h;
+    box.querySelectorAll('.choice').forEach(function(b){
+      b.addEventListener('click', function(){ choices[+b.dataset.i][1](); window.scrollTo(0, 0); });
+    });
+  }
+
+  function start(){
+    late = false;
+    scene(
+      '<h2>Khalid finds a way in</h2><p class="lead">A made-up story. Your choices decide the ending. There are five endings.</p>' +
+      '<div class="scene"><small>DOHA · 9 PM</small>' +
+      '<p>Khalid is 14. He plays for Corniche Kickers, a football academy.</p>' +
+      '<p>Every week he books training on the academy\'s app. Tonight he opens his booking.</p>' +
+      '<p>But the screen shows someone else\'s.</p>' + phone() +
+      '<p>He closes the app and opens it again. It is still there. The app has made a mistake.</p></div>' +
+      '<div class="note good"><b>So far, Khalid has done nothing wrong.</b> The app showed him this by mistake.</div>',
+      "What does Khalid do?",
+      [["Close it. Tell his dad, so they can report it to the academy.", tell],
+       ["Look at more. How many families can he see? He is just curious.", curious],
+       ["Screenshot it. Send it to the team group chat. It's funny.", function(){ end("chat"); }],
+       ["Close the app and forget it. Not his problem.", function(){ end("silent"); }]]);
+  }
+
+  function tell(){
+    var pre = late
+      ? '<div class="note">Better late than never. But the 30 families he already looked at cannot be unseen.</div>'
+      : '';
+    scene(
+      '<h2>Telling someone</h2>' + pre +
+      '<div class="scene"><small>KHALID\'S DAD</small>' +
+      '<p>“Good call. The academy needs to know. How shall we tell them?”</p></div>',
+      "How do they tell the academy?",
+      [["Email the academy privately. Say what Khalid saw, and when. No screenshots of Yaseen's details.", function(){ end("private"); }],
+       ["Post on the academy's Instagram: “Your app is leaking everyone's details!”", function(){ end("public"); }]]);
+  }
+
+  function curious(){
+    scene(
+      '<h2>Just curious</h2>' +
+      '<div class="scene"><small>9.20 PM</small>' +
+      '<p>Khalid taps “next”. Another family. And another.</p>' +
+      '<p>He has now seen 30 families\' names, phone numbers and areas.</p>' +
+      '<p>He starts to feel uneasy.</p></div>' +
+      '<div class="note law"><b>The line.</b> Finding the mistake was not a crime. ' +
+      'But he now knows he should not be seeing this. Qatar\'s law covers staying in once you know.</div>',
+      "What does Khalid do now?",
+      [["Stop now. Close it, and tell his dad.", function(){ late = true; tell(); }],
+       ["Keep going. Save a list of everyone “as proof” for the academy.", function(){ end("list"); }]]);
+  }
+
+  function lab(pair){ return '<span class="lab ' + pair[0] + '">' + pair[1] + '</span>'; }
+
+  function end(key){
+    var e = ENDINGS[key];
+    var firstEver = Object.keys(found).length === 0;
+    found[key] = true;
+    var n = Object.keys(found).length;
+    var cornerNames = {1: "Legal and right", 2: "Legal but wrong", 3: "Illegal but right?", 4: "Illegal and wrong"};
+    var h = '<div class="endtitle">Ending: ' + e.title + '</div>' +
+      '<p class="lead">Write this title in Part 3 of your worksheet.' + (firstEver ? ' This was your first ending.' : '') + '</p>' +
+      (late && key === "private"
+        ? '<div class="labels">' + lab(["no", "LEGAL? ✘ Not the 30 he looked at"]) + lab(["yes", "RIGHT? ✔ Telling was"]) + '</div>' +
+          '<div class="corner">Split: telling was corner 1. The looking was corner 4.</div>'
+        : '<div class="labels">' + lab(e.legal) + lab(e.right) + '</div>' +
+          '<div class="corner"><i class="c' + e.corner + '">' + e.corner + '</i> Corner ' + e.corner + ': ' + cornerNames[e.corner] + '</div>') +
+      '<div class="story" style="margin-top:14px">';
+    e.story.forEach(function(p){ h += '<p>' + p + '</p>'; });
+    h += '</div>';
+    if (late && key === "private") {
+      h += '<div class="note">Telling was right. But looking at 30 more families was still unauthorised access — ' +
+           'he went past the point where he knew. Next time: STOP sooner.</div>';
+    }
+    if (late && key === "public") {
+      h += '<div class="note">He also looked at 30 families before he stopped — that part was unauthorised access.</div>';
+    }
+    h += '<div class="note ' + (e.corner === 1 ? 'good' : (e.corner === 4 ? 'law' : '')) + '"><b>The rule.</b> ' + e.rule + '</div>';
+    h += '<div class="found"><b>Endings found: ' + n + ' of 5</b><ul>';
+    ORDER.forEach(function(k){
+      h += found[k] ? '<li class="got">✔ ' + ENDINGS[k].title + '</li>' : '<li class="not">○ ?</li>';
+    });
+    h += '</ul>' + (n === 5 ? '<p class="note good" style="margin-top:12px"><b>All five found.</b> Now try tab 2: Legal or right?</p>' : '') +
+         '</div><div class="bar"><button class="btn" id="again">Play again</button></div>';
+    box.innerHTML = h;
+    document.getElementById('again').addEventListener('click', function(){ start(); window.scrollTo(0, 0); });
+  }
+
+  start();
+
+  /* ---------- the sort ---------- */
+  var CARDS = [
+    {t: "A school IT technician resets a pupil's password, because the pupil asked.",
+     ok: [1], why: "It is his job, and the pupil asked. Permission, used for its purpose."},
+    {t: "Fahad's mum leaves her laptop logged in. He reads her work emails.",
+     ok: [4], why: "An open laptop is not permission. Her work emails also hold other people's data."},
+    {t: "A free game is allowed to show adverts. It makes levels very hard, so players buy power-ups.",
+     ok: [2, 1], why: "It is legal. Is it right? Many people say it is unfair, especially to children. Your reason matters."},
+    {t: "A security company tests a hospital's network under a signed contract. It reports 12 flaws.",
+     ok: [1], why: "Written permission from the owner, an agreed scope, and every flaw reported. That is a penetration test."},
+    {t: "Dana's friend gives her his password to check his game scores. She changes his username to something rude.",
+     ok: [4], why: "He gave permission to LOOK, not to change. Going beyond what you are allowed is illegal — and it is unkind."},
+    {t: "A researcher finds a flaw in a bank's app by accident. She stops, reports it privately, and waits.",
+     ok: [1], why: "STOP · TELL · WAIT. Finding it by accident is not a crime, and she did not carry on."},
+    {t: "A private photo of a classmate is going round. Omar does not forward it. He does not tell anyone either.",
+     ok: [2], why: "Doing nothing is legal. But he could have helped — told a teacher, or reported it."},
+    {t: "An employee leaks secret proof that her company is poisoning a river. She gives it to a newspaper.",
+     ok: [3, 4], why: "People argue about this. Copying secret files can break the law. But she protected people. Could she have gone to a regulator first?"}
+  ];
+  var CN = {1: "Legal and right", 2: "Legal but wrong", 3: "Illegal but right?", 4: "Illegal and wrong"};
+  var si = 0, sscore = 0;
+  var sbox = document.getElementById('sortBox');
+  var sbar = document.getElementById('sortBar');
+
+  function showCard(){
+    sbar.style.width = (si / CARDS.length * 100) + '%';
+    if (si >= CARDS.length) {
+      sbox.innerHTML = '<div class="scene"><small>DONE</small><p>You matched ' + sscore + ' of ' + CARDS.length +
+        ' cards.</p><p>Remember: the law asks were you ALLOWED? Ethics asks is it RIGHT?</p></div>' +
+        '<div class="bar"><button class="btn" id="sAgain">Start again</button></div>';
+      document.getElementById('sAgain').addEventListener('click', function(){ si = 0; sscore = 0; showCard(); });
+      return;
+    }
+    var c = CARDS[si];
+    var h = '<div class="score">Card ' + (si + 1) + ' of ' + CARDS.length + '</div>' +
+      '<div class="scene"><p>' + c.t + '</p></div><div class="q">Which corner?</div><div class="grid4">';
+    [1, 2, 3, 4].forEach(function(k){
+      h += '<button class="cbtn k' + k + '" data-k="' + k + '"><i>' + k + '</i>' + CN[k] + '</button>';
+    });
+    h += '</div><div id="sfb"></div>';
+    sbox.innerHTML = h;
+    sbox.querySelectorAll('.cbtn').forEach(function(b){
+      b.addEventListener('click', function(){ pick(+b.dataset.k, b); });
+    });
+  }
+
+  function pick(k, btn){
+    var c = CARDS[si];
+    sbox.querySelectorAll('.cbtn').forEach(function(b){ b.disabled = true; });
+    btn.classList.add('picked');
+    var fb = document.getElementById('sfb');
+    var cls, head;
+    if (c.ok[0] === k) { cls = 'ok'; head = 'Yes — corner ' + k + '.'; sscore++; }
+    else if (c.ok.indexOf(k) > -1) { cls = 'part'; head = 'Fair — people argue about this one.'; sscore++; }
+    else { cls = 'no'; head = 'Not quite. Best fit: corner ' + c.ok[0] + ' — ' + CN[c.ok[0]] + '.'; }
+    fb.innerHTML = '<div class="fb ' + cls + '"><strong>' + head + '</strong>' + c.why + '</div>' +
+      '<div class="bar"><button class="btn" id="sNext">Next card</button></div>';
+    document.getElementById('sNext').addEventListener('click', function(){ si++; showCard(); });
+  }
+
+  showCard();
+})();
+</script>
+</body>
+</html>
